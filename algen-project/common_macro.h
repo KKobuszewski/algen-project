@@ -26,7 +26,7 @@
 // Clasic C:
 
 #define	CPRINT(_msg) {																		  \
-	printf(_msg);																			  \
+	fprintf (stdout, _msg);																			  \
 }
 
 ///////////////////////////////////
