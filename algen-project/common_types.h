@@ -21,18 +21,18 @@
 // Types:
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-/*
-* Default data type.
-* float / double / long double !
+/* * * * * * * * * * * * * * * * *
+* Default major data type.
+* float / double / long double
 */
 typedef double Data;
 
-/*
+/* * * * * * * * * * * * * * * * *
 * Default complex type.
 */
 typedef fftw_complex Cplx;
 
-/*
+/* * * * * * * * * * * * * * * * *
 * Basis functions.
 * They take arguments: double* point, double* arguments, ndims, nparams
 * They return value of type double __complex__
