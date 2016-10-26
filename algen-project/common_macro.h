@@ -26,7 +26,7 @@
 // Clasic C:
 
 #define	CPRINT(_msg) {																		  \
-	printf(_msg);																			  \
+	fprintf(stdout, _msg);																	  \
 }
 
 ///////////////////////////////////
@@ -48,62 +48,6 @@
 //	PRINT(<< "Func: " << __MY_FUNC_NAME__ << "()" << std::endl );							  \
 //	PRINT(<< "Text: " << _my_text                 << std::endl );							  \
 //}
-
-///////////
-
-
-
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-// MATH:
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////
-// Cplx math:
-
-#define CPLX_ADD(_z1, _z2, _out)															  \
-	_out.x = _z1.x + _z2.x;																	  \
-	_out.y = _z1.y + _z2.y;
-
-#define CPLX_SUBTRACT(_z1, _z2, _out) {														  \
-	_out.x = _z1.x - _z2.x;																	  \
-	_out.y = _z1.y - _z2.y;																	  \
-}
-
-#define CPLX_MULTIPLY(_z1, _z2, _out) {														  \
-	Data _tmp_out;																			  \
-	_out.x = _z1.x * _z2.x - _z1.y * _z2.y;													  \
-	_out.y = _z1.x * _z2.y + _z1.y * _z2.x;													  \
-	_out.x = _tmp_out.x;																	  \
-	_out.y = _tmp_out.y;																	  \
-}
-
-#define CPLX_DIVIDE(_z1, _z2, _out) {														  \
-	Data _tmp_out;																			  \
-	_tmp_out.x = (_z1.x * _z2.x + _z1.y * _z2.y) / (_z2.x * _z2.x + _z2.y * _z2.y);			  \
-	_tmp_out.y = (_z1.y * _z2.x - _z1.x * _z2.y) / (_z2.x * _z2.x + _z2.y * _z2.y);			  \
-	_out.x = _tmp_out.x;																	  \
-	_out.y = _tmp_out.y;																	  \
-}
-
-#define CPLX_SCALE(_z, _scale, _out) {														  \
-	Data _tmp_out;																			  \
-	_tmp_out.x = _z.x * _scale;																  \
-	_tmp_out.y = _z.y * _scale;																  \
-	_out.x = _tmp_out.x;																	  \
-	_out.y = _tmp_out.y;																	  \
-}
-
-#define CPLX_MODULE_2(_z)																	  \
-	_z.x * _z.x + _z.y * _z.y
-
-#define CPLX_MODULE(_z)																		  \
-	sqrt( CPLX_MODULE_2(_z) )
-
-#define CPLX_CONJUGATE(_z)																	  \
-	_z.y = (-1) * _z.y;
 
 ///////////
 
