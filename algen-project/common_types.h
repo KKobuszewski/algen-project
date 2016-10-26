@@ -46,20 +46,20 @@
 typedef double Data;
 
 /* * * * * * * * * * * * * * * * *
-* Default complex type.
+* My complex class with complex math Support
 */
 class Cplx_core {
 private:
 	fftw_complex fftw_cplx;
 public:
-	INLINE fftw_complex& get() {
-		return this->fftw_cplx;
-	}
+	INLINE fftw_complex& get() { return this->fftw_cplx; }
 public:
 	INLINE double&    operator [] (int);
 	INLINE Cplx_core& operator =  (Cplx_core);
 	INLINE Cplx_core& operator += (Cplx_core);
 	INLINE Cplx_core& operator -= (Cplx_core);
+	INLINE void       operator *= (Cplx_core);
+	INLINE void       operator /= (Cplx_core);
 public:
 	INLINE Cplx_core& operator + (Cplx_core);
 	INLINE Cplx_core& operator - (Cplx_core);
@@ -69,6 +69,10 @@ public:
 	INLINE Cplx_core& operator * (float);
 	INLINE Cplx_core& operator / (float);
 };
+
+/* * * * * * * * * * * * * * * * *
+* Default complex type.
+*/
 typedef Cplx_core Cplx;
 
 /* * * * * * * * * * * * * * * * *
@@ -116,6 +120,11 @@ typedef void (*basis_ptr) (Cplx*, double*, double*, unsigned, unsigned);
 	_out[Imag] += _z[Imag];																	  \
 }
 
+#define CPLX_SUBTRACT_ASSIGN(_out, _z) {													  \
+	_out[Real] -= _z[Real];																	  \
+	_out[Imag] -= _z[Imag];																	  \
+}
+
 #define CPLX_ADD(_out, _z1, _z2) {															  \
 	_out[Real] = _z1[Real] + _z2[Real];														  \
 	_out[Imag] = _z1[Imag] + _z2[Imag];														  \
@@ -156,7 +165,7 @@ typedef void (*basis_ptr) (Cplx*, double*, double*, unsigned, unsigned);
 	sqrt( CPLX_MODULE_2(_z) )
 
 ///////////////////////////////////
-// overloaded class operators (Cplx - Cplx only):
+// overloaded class operators (access elements):
 
 INLINE double& Cplx_core::operator [] (int i) {
 	return fftw_cplx[i];
@@ -173,9 +182,17 @@ INLINE Cplx_core& Cplx_core::operator += (Cplx_core z) {
 }
 
 INLINE Cplx_core& Cplx_core::operator -= (Cplx_core z) {
-	this->fftw_cplx[Real] -= z.fftw_cplx[Real];
-	this->fftw_cplx[Imag] -= z.fftw_cplx[Imag];
+	CPLX_SUBTRACT_ASSIGN(this->fftw_cplx, z.fftw_cplx);
 	return *this;
+}
+
+INLINE void Cplx_core::operator *= (Cplx_core z) {
+	CPLX_MULTIPLY(this->fftw_cplx, this->fftw_cplx, z);
+	return;
+}
+INLINE void Cplx_core::operator /= (Cplx_core z) {
+	CPLX_DIVIDE(this->fftw_cplx, this->fftw_cplx, z);
+	return;
 }
 
 ///////////////////////////////////
