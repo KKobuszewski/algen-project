@@ -52,7 +52,9 @@ class Cplx_core {
 private:
 	fftw_complex fftw_cplx;
 public:
-	INLINE fftw_complex& get();
+	INLINE fftw_complex& get() {
+		return this->fftw_cplx;
+	}
 public:
 	INLINE double&    operator [] (int);
 	INLINE Cplx_core& operator =  (Cplx_core);
