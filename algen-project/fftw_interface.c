@@ -1,18 +1,4 @@
-#include <complex.h>
-#include <fftw3.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <omp.h>
-
 #include "fftw_interface.h"
-
-#ifndef M_PI
-#define M_PI 3.141592653589793
-#endif
-
-
 
 fftw_complex *fftw_input = NULL;
 fftw_complex *fftw_input2 = NULL;
@@ -20,17 +6,16 @@ fftw_complex *fftw_output = NULL;
 fftw_complex *fftw_output2 = NULL;
 fftw_plan pf, pi, pi2;
 
-
 void create_plan_1d(size_t xdim)
 {
-    fftw_input   = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * xdim);
-    fftw_input2  = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * xdim);
-    fftw_output  = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * xdim);
-    fftw_output2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * xdim);
+	fftw_input   = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * xdim);
+	fftw_input2  = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * xdim);
+	fftw_output  = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * xdim);
+	fftw_output2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * xdim);
 
-    pf  = fftw_plan_dft_1d(xdim, fftw_input, fftw_output, FFTW_FORWARD,  FFTW_PATIENT);
-    pi  = fftw_plan_dft_1d(xdim, fftw_output, fftw_input, FFTW_BACKWARD, FFTW_PATIENT);
-    pi2 = fftw_plan_dft_1d(xdim, fftw_output2, fftw_input2, FFTW_BACKWARD, FFTW_PATIENT);
+	pf  = fftw_plan_dft_1d(xdim, fftw_input, fftw_output, FFTW_FORWARD,  FFTW_PATIENT);
+	pi  = fftw_plan_dft_1d(xdim, fftw_output, fftw_input, FFTW_BACKWARD, FFTW_PATIENT);
+	pi2 = fftw_plan_dft_1d(xdim, fftw_output2, fftw_input2, FFTW_BACKWARD, FFTW_PATIENT);
 }
 
 void create_plan_2d(size_t xdim, size_t ydim)
@@ -51,26 +36,26 @@ void create_plan_3d(size_t xdim, size_t ydim, size_t zdim)
     pi = fftw_plan_dft_3d(xdim, ydim, zdim, fftw_output, fftw_input, FFTW_BACKWARD, FFTW_PATIENT);
 }
 
-void fft_Z2Z_forward_1d(double __complex__ *in_arr, double __complex__ *out_arr, const size_t xdim)
+void fft_Z2Z_forward_1d(Cplx *in_arr, Cplx *out_arr, const size_t xdim)
 {
     fftw_plan plan = fftw_plan_dft_1d(xdim, in_arr, out_arr, FFTW_FORWARD,  FFTW_ESTIMATE);
     fftw_execute(plan);
 }
 
-void fft_Z2Z_inverse_1d(double __complex__ *in_arr, double __complex__ *out_arr, const size_t xdim)
+void fft_Z2Z_inverse_1d(Cplx *in_arr, Cplx *out_arr, const size_t xdim)
 {
     fftw_plan plan = fftw_plan_dft_1d(xdim, in_arr, out_arr, FFTW_BACKWARD,  FFTW_ESTIMATE);
     fftw_execute(plan);
 }
 
-void fft_D2Z_forward_1d(double *in_arr, double __complex__ *out_arr, const size_t xdim)
+void fft_D2Z_forward_1d(double *in_arr, Cplx *out_arr, const size_t xdim)
 {
     #pragma omp simd
-    for (register size_t ix = 0; ix < xdim; ix++)    fftw_input[ix] = in_arr[ix] + 0.*I;
+    for (register size_t ix = 0; ix < xdim; ix++) fftw_input[ix] = in_arr[ix] + 0.*I;
     fftw_execute(pf);
 }
 
-void fft_Z2D_inverse_1d(double __complex__ *in_arr, double *out_arr, const size_t xdim)
+void fft_Z2D_inverse_1d(Cplx *in_arr, double *out_arr, const size_t xdim)
 {
     fftw_plan plan = fftw_plan_dft_1d(xdim, in_arr, in_arr, FFTW_BACKWARD,  FFTW_ESTIMATE);
     fftw_execute(plan);
@@ -93,7 +78,7 @@ void fftdiff_1d(double *in_arr, double *dfdx, double *d2fd2x, const size_t xdim)
     fftw_execute(pf);
     
     // copy fourier transform
-    memcpy(fftw_output2, fftw_output, xdim * sizeof(double __complex__));
+    memcpy(fftw_output2, fftw_output, xdim * sizeof(Cplx));
     
     #pragma omp parallel sections default(shared) private(ix,jx) num_threads(2)
     {
