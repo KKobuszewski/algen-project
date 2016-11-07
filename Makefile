@@ -21,4 +21,4 @@ FFTW      = fftw_interface.o
 all: $(FFTW)
 
 $(FFTW):
-	$(CC) -c fftw_interface.c -o $@ $(CC_FLAGS) $(CC_INC) $(CC_DEFS) $(CC_LIBS)
+	$(CXX) -c fftw_diffs/fftw_interface.c -o $@ $(CXX_FLAGS) $(CXX_INC) $(CXX_DEFS) $(CC_LIBS)
