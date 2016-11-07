@@ -1,6 +1,6 @@
 
 # c compiler
-CC 	  = gcc
+CC 	      = gcc
 CC_FLAGS  = -Wall -Wundef -m64 -march=native -O3 -msse4 -ftree-vectorizer-verbose=1 -fopenmp -fPIC
 CC_INC    = -I.
 CC_DEFS   = 

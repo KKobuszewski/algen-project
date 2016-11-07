@@ -9,8 +9,12 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <complex.h>
+#include <complex.h> // == <ccomplex>, std::complex<typenaame T> <- <complex>
 #include <math.h>
+
+#include <omp.h>
+
+#include <random>
 
 
 /*
@@ -18,7 +22,7 @@
  * They take arguments: double* point, double* arguments, ndims, nparams
  * They return value of type double __complex__
  */
-typedef double __complex__ (*basis_ptr)(double*, double*, unsigned, unsigned);
+typedef (double __complex__) (*basis_ptr)(double*, double*, unsigned, unsigned);
 
 
 int main()
@@ -27,6 +31,8 @@ int main()
   const unsigned m = 100;                // population size
   const unsigned d = 1;                  // number of dimensions
   const unsigned npart = 1;              // number of particles
+
+  printf("\n");
 
   // allocate array of pointers to a function for basis representation
   basis_ptr* ptr_func_arr = (basis_ptr*) malloc( sizeof(basis_ptr) * N );
@@ -45,8 +51,42 @@ int main()
   double** coeffs     = (double**) malloc( sizeof(double*) * m );
   double*  coeffs_mem = (double*) malloc( sizeof(double) * m*N );
   for (unsigned ii = 0; ii < m; ii++) coeffs[ii] = &(coeffs_mem[ii*N]);
+  printf("Total bytes allocated: %lu\n", 3*sizeof(double*)*m + sizeof(double)*m*N*(2*N+1) );
+  printf("\n");
+
+  // generate random population
+  printf("Initializing population ...\n");
+  std::random_device r; // Seed with a real random value, if available
+  std::seed_seq seed{r(), r(), r(), r(), r(), r(), r(), r()};
+  std::mt19937_64 mersenne(seed);
+  std::uniform_real_distribution<double>uniform_dist(0., 1.);
+  register double norm_const = 0;
+  //#pragma omp parallel for
+  for(unsigned ii = 0; ii < m; ii++)
+  {
+      #pragma omp simd
+      for (unsigned jj = ii; jj < ii*N; jj++)
+      {
+          register double random = uniform_dist(mersenne);
+          coeffs_mem[jj] =  random;
+          norm_const += random;
+      }
+      #pragma omp simd
+      for (unsigned jj = ii; jj < ii*N; jj++) coeffs_mem[jj] /= norm_const;
+      norm_const = 0;
+  }
+  printf("\n");
 
 
+  for (unsigned ii = 0; ii < m; ii++)
+  {
+      printf("%u individual:\t",ii);
+      for (unsigned jj = 0; jj < m; ii++)
+      {
+          printf("%.5lf ", coeffs_mem[ii*N + jj]);
+      }
+      printf("\n");
+  }
 
 
 
@@ -58,6 +98,7 @@ int main()
   free(hamiltonians);
   free(overlaps);
   free(coeffs);
+  printf("\n");
 
   return EXIT_SUCCESS;
 }
