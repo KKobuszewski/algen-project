@@ -47,12 +47,9 @@ typedef Cplx (*integPtr) (Cplx* conjPsi, Cplx* psi);
 
 ///////////////////////////////////
 // DEFINED: 
-#define NX 256                     // Mesh
-#define DX 0.1f                    // sta³a siaci
-
 #define M  100                     // liczba osobników
 #define N  16                      // liczba f. bazy
-#define D  1                       // liczba wymiarów
+#define D  3                       // liczba wymiarów
 
 ///////////////////////////////////
 // D - DIMENSIONAL GRID:
@@ -100,7 +97,7 @@ Cplx psi(Data* coordinates, double* params, unsigned int ncoords, unsigned int n
 void eavluate_hamiltonian(funcPtr gen_psi, Cplx** H, Cplx** S, double*** params, const int param_size) {
 	///////////////////////////////////
 	// GEN COORDS:
-	srand(time(NULL));
+	//srand(time(NULL));
 	Data** coords_all = new Data*[D];
 	for (int d = 0; d < D; d++) {
 
@@ -109,8 +106,10 @@ void eavluate_hamiltonian(funcPtr gen_psi, Cplx** H, Cplx** S, double*** params,
 
 		// SET VALUES:
 		for (int i = 0; i < g_nq[d]; i++) {
-			coords_all[d][i] = ((double)rand() / (double)RAND_MAX) - 0.5f;
-			coords_all[d][i] = 2.0f * g_nq[d] * coords_all[d][i];
+			coords_all[d][i] = g_q0[d] + i * g_dq[d];
+
+			//coords_all[d][i] = ((double)rand() / (double)RAND_MAX) - 0.5f;
+			//coords_all[d][i] = 2.0f * g_nq[d] * coords_all[d][i];
 		}
 	}
 
@@ -148,6 +147,10 @@ void eavluate_hamiltonian(funcPtr gen_psi, Cplx** H, Cplx** S, double*** params,
 		delete[] coords_all[i];
 	}
 	delete[] coords_all;
+
+	////////////////////////////////////
+	// EXIT:
+	return;
 }
 
 ///////////
@@ -173,11 +176,21 @@ int main(int argc, char ** argv) {
 
 	////////////////////////////////////
 	// WORK-SPACE:
-	g_nq[0] = NX; // dowolny mechanizm wype³nienia sieci. Taki wygodny na pocz¹tek.
-	g_dq[0] = DX; // -||-
-	set_grid();   // Wygeneruj punkty sieci Q0;
 
-	printf("%f", g_q0[0]);
+	// dowolny mechanizm wype³nienia sieci. Taki wygodny na pocz¹tek.
+	g_nq[0] = 256;
+	g_nq[1] = 512;
+	g_nq[2] = 16;
+
+	g_dq[0] = 0.1f;
+	g_dq[1] = 0.1f;
+	g_dq[2] = 0.1f;
+
+	// Wygeneruj punkty sieci Q0;
+	set_grid();
+	for (int i = 0; i < D; i++) {
+		printf("%f \n", g_q0[i]);
+	}
 
 
 
