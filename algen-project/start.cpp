@@ -16,7 +16,7 @@
 /////////////////////////////////////////////////////////////////////////
 typedef std::complex<double> Cplx;
 typedef Cplx (*funcPtr)  (double* coordinates, double* params, unsigned int ncoords, unsigned int nparams);
-typedef Cplx (*integPtr) (Cplx* cpsi, Cplx* psi);
+typedef Cplx (*integPtr) (Cplx* conjPsi, Cplx* psi);
 
 /////////////////////////////////////////////////////////////////////////
 Cplx psi(double* coordinates, double* params, unsigned int ncoords, unsigned int nparams) {
@@ -36,7 +36,7 @@ void eavluate_hamiltonian(funcPtr gen_psi, Cplx** H, Cplx** S, double*** params,
 			}
 
 			///////////////////////////////////
-			Cplx cpsi_j = std::conj( gen_psi(coords, params[i][j], D, param_size) );
+			Cplx conjPsi_j = std::conj( gen_psi(coords, params[i][j], D, param_size) );
 			for (int k = 0; k < N; k++) {
 				Cplx psi_k = gen_psi(coords, params[i][k], D, param_size);
 				S[j][k] = 0.0f;
