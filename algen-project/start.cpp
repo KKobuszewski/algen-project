@@ -100,14 +100,17 @@ Cplx psi(Data* coordinates, double* params, unsigned int ncoords, unsigned int n
 void eavluate_hamiltonian(funcPtr gen_psi, Cplx** H, Cplx** S, double*** params, const int param_size) {
 	///////////////////////////////////
 	// GEN COORDS:
+	srand(time(NULL));
 	Data** coords_all = new Data*[D];
 	for (int d = 0; d < D; d++) {
+
 		// ALLOC MEM: 
 		coords_all[d] = new Data[g_nq[d]];
 
 		// SET VALUES:
 		for (int i = 0; i < g_nq[d]; i++) {
-			coords_all[d][i] = g_q0[d] + i * g_dq[d];
+			coords_all[d][i] = ((double)rand() / (double)RAND_MAX) - 0.5f;
+			coords_all[d][i] = 2.0f * g_nq[d] * coords_all[d][i];
 		}
 	}
 
@@ -119,7 +122,7 @@ void eavluate_hamiltonian(funcPtr gen_psi, Cplx** H, Cplx** S, double*** params,
 			Data coords[D];
 			for (int d = 0; d < D; d++) {
 				for (int mesh = 0; mesh < g_nq[d]; mesh++) {
-					
+
 					///////////////////////////////////
 					// GET RIGHT COORDS:
 					for (int dim = 0; dim < D; dim++) {
@@ -131,7 +134,7 @@ void eavluate_hamiltonian(funcPtr gen_psi, Cplx** H, Cplx** S, double*** params,
 					Cplx conjPsi_j = std::conj(gen_psi(coords, params[i][j], D, param_size));
 					for (int k = 0; k < N; k++) {
 						Cplx psi_k = gen_psi(coords, params[i][k], D, param_size);
-						S[j][k] += conjPsi_j * psi_k;  // sumowanie s[j][k] jako wstêp do ca³kowania. // ca³kowanie i tak sprowadzi sie do sumy z tablicy values[ g_nq[0] + g_nq[1] + g_nq[2] + ... + g_nq[D-1] ];
+						S[j][k] += conjPsi_j * psi_k; // sumowanie s[j][k] jako wstêp do ca³kowania. // ca³kowanie i tak sprowadzi sie do sumy z tablicy values[ g_nq[0] + g_nq[1] + g_nq[2] + ... + g_nq[D-1] ];
 						H[j][k] += 0.0f;
 					}
 				}
@@ -174,6 +177,7 @@ int main(int argc, char ** argv) {
 	g_dq[0] = DX; // -||-
 	set_grid();   // Wygeneruj punkty sieci Q0;
 
+	printf("%f", g_q0[0]);
 
 
 
