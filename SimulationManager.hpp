@@ -12,10 +12,10 @@
 #include <algorithm>
 #include <complex>
 
-#include "Random.hpp"
-#include "basis.h"
-#include "hamiltonian.h"
-#include "integrator.hpp"
+#include <random/Random.hpp>
+#include <basis.h>
+#include <hamiltonian.h>
+#include <integrator/Integrator.hpp>
 
 #ifndef THREADS
 #define THREADS 8
