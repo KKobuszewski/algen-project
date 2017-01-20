@@ -21,13 +21,27 @@ namespace Genetic
 {
 
 double tot_adapation;
-double beta = 1.;
+double beta = 10.;
 double impact_factor = 1.;
-double n_energies = 1;
+unsigned n_energies = 1;
 
 Random genetic_rng;
 
 
+inline void set_selection_pressure(const double _beta)
+{
+    beta = _beta;
+}
+
+inline void set_impact_factor(const double _alpha)
+{
+    impact_factor = _alpha;
+}
+
+inline void set_levels_for_adaptation(const unsigned _n)
+{
+    n_energies = _n;
+}
 
 
 // ===========================================  SOME FANCY UTILITIES  =====================================================================
@@ -373,7 +387,6 @@ inline genetic_result_t crossover_mode1(SimulationManager *sim, const double pc)
     //printf("pc = %.5lf\n",pc*2./(m-1.));
     
     
-    
     // iterate over each pair of individuals
     for (unsigned ii=0; ii < m; ii++)
     for (unsigned jj=0; jj < ii; jj++)
@@ -436,16 +449,18 @@ inline genetic_result_t crossover_mode2(SimulationManager *sim, const double pc)
     const unsigned m      = sim->mpopulation;
     
     for (unsigned ii=0; ii < nbasis; ii++)    random_perm[ii] = ii;
-    //printf("pc = %.5lf\n",pc*2./(m-1.));
+    
+    for (unsigned ii=0; ii < m; ii++)         population_perm[ii] = ii;
+    genetic_rng.shuffle_array<unsigned>(population_perm,m);
     
     // iterate over each pair of individuals
     for (unsigned ii=0; ii < m/2; ii++)
     {
         unsigned jj = m - ii - 1;
-        unsigned* population1 = sim->population[ii];
-        unsigned* population2 = sim->population[jj];
+        unsigned* population1 = sim->population[ population_perm[ii] ];
+        unsigned* population2 = sim->population[ population_perm[jj] ];
         
-        if ( pc*2. > genetic_rng.get_random_uniform() )
+        if ( pc > genetic_rng.get_random_uniform() )                // shouldn't be pc*2.? -> rather not, because it could be grater than 1.
         {
             printf("Crossver individuals %u & %u\t",ii,jj);
             
@@ -469,7 +484,7 @@ inline genetic_result_t crossover_mode2(SimulationManager *sim, const double pc)
             {
                 //unsigned idx_to_swap = genetic_rng.random_integer(0,nbasis-1);
                 unsigned idx_to_swap = random_perm[kk];
-                sim->swap_basis_func(ii,jj,indices_in_populations[kk],idx_to_swap);
+                sim->swap_basis_func(population_perm[ii],population_perm[jj],indices_in_populations[kk],idx_to_swap);
                 //printf("crossover (%u,%u): %u -> %u\n",ii,jj,indices_in_populations[kk],idx_to_swap);
             }
             
@@ -479,7 +494,7 @@ inline genetic_result_t crossover_mode2(SimulationManager *sim, const double pc)
             {
                 //unsigned idx_to_swap = genetic_rng.random_integer(0,nbasis-1);
                 unsigned idx_to_swap = random_perm[kk];
-                sim->swap_basis_func(jj,ii,(indices_in_populations+n1)[kk],idx_to_swap);
+                sim->swap_basis_func(population_perm[jj],population_perm[ii],(indices_in_populations+n1)[kk],idx_to_swap);
                 //printf("crossover (%u,%u): %u -> %u\n",jj,ii,idx_to_swap,(indices_in_populations+n1)[kk]);
             }
             

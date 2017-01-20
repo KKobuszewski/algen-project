@@ -93,6 +93,7 @@ public:
     void print_params();
     std::map<unsigned, unsigned> histogramize_basis_functions();
     void print_basis_function_histogram();
+    void print_basis_function_histogram(FILE* stream, unsigned it);
     
     
     // for genetic algorithms
@@ -100,6 +101,21 @@ public:
     void swap_basis_func(unsigned indv1_idx, unsigned indv2_idx, unsigned func1_idx, unsigned func2_idx);
     void mutate_basis_func(unsigned individual_index, unsigned basis_index, unsigned new_wavefunction_index);
     void check_basis_func_different();
+    
+    
+    // stats
+    void energy_stats(double* Emin, double* Eav, double* Emax, double* variance, const unsigned level);
+    void print_energy_stats(const unsigned it,
+                            const double t,
+                            const double Emin,
+                            const double Eav,
+                            const double Emax,
+                            const double variance,
+                            const double beta,
+                            const double alpha,
+                            const double pc,
+                            const double pm,
+                            FILE* stream );
 };
 
 /* ***************************************************************************************************************** *
@@ -576,6 +592,21 @@ inline void SimulationManager::print_basis_function_histogram()
     }
 }
 
+inline void SimulationManager::print_basis_function_histogram(FILE* stream, const unsigned it)
+{
+    std::map<unsigned, unsigned> hist = SimulationManager::histogramize_basis_functions();
+    
+    fprintf(stream,"%u\t",it);
+    for (unsigned ii=0; ii<size_assortment; ii++) 
+    {
+        if (hist.count(ii) == 1)
+            fprintf(stream,"%10u\t",hist[ii]);
+        else
+            fprintf(stream,"%10u\t",(unsigned) 0);
+    }
+    fprintf(stream,"\n");
+}
+
 
 /* *********************************************************************************************************************************************** *
  * Copies individual with given index and saves in another position.                                                                               *
@@ -666,5 +697,89 @@ inline void SimulationManager::check_basis_func_different()
     if (err) { this->print_functions(); exit(EXIT_FAILURE); }
 }
 
+
+
+// ============================================     STATS     ==========================================================================================
+
+
+inline void SimulationManager::energy_stats(double* Emin, double* Eav, double* Emax, double* variance, const unsigned level=0)
+{
+#pragma omp parallel sections num_threads(2)
+{
+    #pragma omp section
+    {
+        const unsigned m = mpopulation;
+        if (Emin)
+        {
+            double _min = energies[0][level];
+            #pragma omp simd
+            for (unsigned ii=1; ii<m; ii++)
+            {
+                if (_min > energies[ii][level] )  
+                    _min = energies[ii][level];
+            }
+            *Emin = _min;
+        }
+        
+        if (Emax)
+        {
+            double _max = energies[0][level];
+            #pragma omp simd
+            for (unsigned ii=1; ii<m; ii++)
+            {
+                if (_max < energies[ii][level] )  
+                    _max = energies[ii][level];
+            }
+            *Emax = _max;
+        }
+    }
+    #pragma omp section
+    {
+        const unsigned m = mpopulation;
+        double _mean = 0.;
+        if (Eav)
+        {
+            #pragma omp simd
+            for (unsigned ii=0; ii<m; ii++)
+            {
+                _mean += energies[ii][level];
+            }
+            _mean /= m;
+            *Eav = _mean;
+        }
+        
+        double _variance = 0.;
+        if (variance)
+        {
+            #pragma omp simd
+            for (unsigned ii=0; ii<m; ii++)
+            {
+                _variance += pow(_mean - energies[ii][level],2);
+            }
+            _variance /= m;
+            *variance = _variance;
+        }
+    }
+}
+}
+
+
+inline void SimulationManager::print_energy_stats(const unsigned it,
+                                                  const double t,
+                                                  const double Emin,
+                                                  const double Eav,
+                                                  const double Emax,
+                                                  const double variance,
+                                                  const double beta,
+                                                  const double alpha,
+                                                  const double pc,
+                                                  const double pm,
+                                                  FILE* stream = stdout)
+{
+    
+    fprintf(  stream,"%u\t%5.5lf\t%.15e\t%.15e\t%.15e\t%.15e\t%.15e\t%.15e\t%.15e\t%.15e\n",
+              it, t, Emin, Eav, Emax, variance, beta, alpha, pc, pm                           );
+    
+}
 
 #endif
