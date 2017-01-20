@@ -15,28 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="common_types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="fftw_interface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common_macro.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common_defined.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClCompile Include="fftw_interface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="start.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ritz.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="fftw_interface.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="common_header.h">
+    <ClInclude Include="fftw_interface.hpp">
       <Filter>Header Files</Filter>
-    </ClCompile>
+    </ClInclude>
   </ItemGroup>
 </Project>
