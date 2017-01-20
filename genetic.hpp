@@ -21,7 +21,7 @@ namespace Genetic
 {
 
 double tot_adapation;
-double beta = 10.;
+double beta = 1.;
 double impact_factor = 1.;
 unsigned n_energies = 1;
 
