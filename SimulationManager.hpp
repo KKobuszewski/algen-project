@@ -809,6 +809,8 @@ inline void SimulationManager::save_eigenvecs(const unsigned it, FILE* stream = 
     fprintf(stream,"\n");
 }
 
+std::complex<double> coeffs[SimulationLimits::max_nbasis];
+
 inline void SimulationManager::save_best_wavefunction(const unsigned it, double* xl, double* xu, FILE* stream, const unsigned level = 0)
 {
     // find best wavefunction
@@ -818,9 +820,22 @@ inline void SimulationManager::save_best_wavefunction(const unsigned it, double*
         if (energies[ii][0] < energies[index][0]) index = ii;
     }
     
+    double norm = 0.;
+    for (unsigned ii=0; ii<nbasis; ii++)
+    {
+        coeffs[ii] = eigvecs[index][level*nbasis + ii];
+        norm += std::abs(coeffs[ii])*std::abs(coeffs[ii]);
+    }
+    for (unsigned ii=0; ii<nbasis; ii++)
+    {
+        coeffs[ii] /= norm;
+    }
+    
+        
+    
     
     const unsigned samples = 8196;
-    std::complex<double>* psi_n = (std::complex<double>*) malloc( pow(samples,tot_dims)*sizeof(std::complex<double>) );
+    std::complex<double>* psi_n = (std::complex<double>*) calloc( pow(samples,tot_dims), sizeof(std::complex<double>) );
     printf("\nSaving wavefunction of individual %u.\n\n",index);
     
     for (unsigned ii=0; ii<nbasis; ii++)
@@ -833,13 +848,14 @@ inline void SimulationManager::save_best_wavefunction(const unsigned it, double*
         integs[0]->evaluate_psi(identity, basis[index][ii], basis[index][ii], params, dims, nparams, npart, samples, xl, xu);
         //printf("Basis function evaluated.\n");
         
-        std::complex<double> coeff = eigvecs[index][level + ii*nbasis];
-        printf("  Coefficient: %.3e+%.3ej\n",coeff.real(),coeff.imag());
+        printf("  Coefficient: %.3e+%.3ej\n",coeffs[ii].real(),coeffs[ii].imag());
         
         #pragma omp parallel for simd
         for (unsigned jj=0; jj<samples; jj++)
         {
-            psi_n[jj] += coeff * integs[0]->cplx_func_on_lattice[jj];
+            psi_n[jj] += coeffs[ii] * integs[0]->cplx_func_on_lattice[jj];
+            
+            if (std::abs(psi_n[jj]) > 10.) printf("%u. %.3e+%.3ej\n",jj,psi_n[jj].real(),psi_n[jj].imag());
         }
     }
     printf("\n");
