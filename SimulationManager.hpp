@@ -116,6 +116,8 @@ public:
                             const double pc,
                             const double pm,
                             FILE* stream );
+    void save_eigenvecs(const unsigned it, FILE* stream, const unsigned level);
+    void save_best_wavefunction(const unsigned it, double* xl, double* xu, FILE* stream, const unsigned level);
 };
 
 /* ***************************************************************************************************************** *
@@ -424,7 +426,7 @@ inline void SimulationManager::evaluate_matrices(const unsigned samples, double*
         
         // make matrices hermitian
         #pragma omp simd
-        for (unsigned ii=0;  ii < nbasis; ii++)
+        for (unsigned ii=0; ii < nbasis; ii++)
         for (unsigned jj=0; jj < nbasis; jj++)
         {
             // for improved accurancy?
@@ -781,5 +783,78 @@ inline void SimulationManager::print_energy_stats(const unsigned it,
               it, t, Emin, Eav, Emax, variance, beta, alpha, pc, pm                           );
     
 }
+
+
+inline void SimulationManager::save_eigenvecs(const unsigned it, FILE* stream = stdout, const unsigned level = 0)
+{
+    if (level > nbasis-1) { exit(EXIT_FAILURE);  printf("Error in save_eigenvecs!\n"); }
+    
+    // find best wavefunction
+    unsigned index = 0;
+    for (unsigned ii=1; ii<mpopulation; ii++)
+    {
+        if (energies[ii][0] < energies[index][0]) index = ii;
+    }
+    
+    // save data
+    fprintf(stream,"%u\t",it);
+    for (unsigned ii=0; ii<nbasis; ii++)
+    {
+        fprintf(stream,"%d\t",population[index][ii]);
+    }
+    for (unsigned ii=0; ii<nbasis; ii++)
+    {
+        fprintf(stream,"%.15e+%.15e\t",eigvecs[index][ii].real(),eigvecs[index][ii].imag());
+    }
+    fprintf(stream,"\n");
+}
+
+inline void SimulationManager::save_best_wavefunction(const unsigned it, double* xl, double* xu, FILE* stream, const unsigned level = 0)
+{
+    // find best wavefunction
+    unsigned index = 0;
+    for (unsigned ii=1; ii<mpopulation; ii++)
+    {
+        if (energies[ii][0] < energies[index][0]) index = ii;
+    }
+    
+    
+    const unsigned samples = 8196;
+    std::complex<double>* psi_n = (std::complex<double>*) malloc( pow(samples,tot_dims)*sizeof(std::complex<double>) );
+    printf("\nSaving wavefunction of individual %u.\n\n",index);
+    
+    for (unsigned ii=0; ii<nbasis; ii++)
+    {
+        printf("%u.",ii);
+        double* params = params_to_funcs[index] + ii*nbasis*nparams;
+        printf("Params: ");
+        for (unsigned kk=0; kk<nparams; kk++) printf("%.3lf ", params[kk]);
+        //printf("\n");
+        integs[0]->evaluate_psi(identity, basis[index][ii], basis[index][ii], params, dims, nparams, npart, samples, xl, xu);
+        //printf("Basis function evaluated.\n");
+        
+        std::complex<double> coeff = eigvecs[index][level + ii*nbasis];
+        printf("  Coefficient: %.3e+%.3ej\n",coeff.real(),coeff.imag());
+        
+        #pragma omp parallel for simd
+        for (unsigned jj=0; jj<samples; jj++)
+        {
+            psi_n[jj] += coeff * integs[0]->cplx_func_on_lattice[jj];
+        }
+    }
+    printf("\n");
+    
+    fwrite(psi_n,sizeof(std::complex<double>)*npart*dims*samples,1,stream);
+    
+    free(psi_n);
+}
+
+
+
+
+
+
+
+
 
 #endif

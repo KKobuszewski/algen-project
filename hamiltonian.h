@@ -28,7 +28,7 @@ inline double potential(double* x, const unsigned ndims, unsigned nparticles)
     #pragma omp simd reduction(+:pot)
     for (unsigned ii=0; ii < nparticles*ndims; ii++)
     {
-        pot += omega[ii%ndims]*x[ii]*x[ii] + .05*omega[ii%ndims]*x[ii]*x[ii]*omega[ii%ndims]*x[ii]*x[ii];
+        pot += omega[ii%ndims]*x[ii]*x[ii];// + .05*omega[ii%ndims]*x[ii]*x[ii]*omega[ii%ndims]*x[ii]*x[ii];
     }
     return .5*pot;  // 1/2 m w^2 \sum_i \sum_j x_ij^2
 }

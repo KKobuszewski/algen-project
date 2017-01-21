@@ -44,6 +44,13 @@ public:
         std::uniform_int_distribution<> rnd_int_gen(min, max);
         return rnd_int_gen(mersenne);
     }
+    
+    double get_gaussian()
+    {
+        
+        
+    }
+    
 };
 
 #endif

@@ -198,9 +198,9 @@ inline genetic_result_t random_selection_patryk(SimulationManager *sim)
         ad[ii] = adaptation_function(sim->energies[ii],n_energies,beta,impact_factor);
         sum += ad[ii];
     }
-    printf("min PDF: %.3lf\n",*std::min_element(ad,ad+m));
-    printf("max PDF: %.3lf\n",*std::max_element(ad,ad+m));
-    printf("sum PDF: %.3lf\n",sum);
+    //printf("min PDF: %.3lf\n",*std::min_element(ad,ad+m));
+    //printf("max PDF: %.3lf\n",*std::max_element(ad,ad+m));
+    //printf("sum PDF: %.3lf\n",sum);
     
     // Obliczam ulamki
     #pragma omp for simd
@@ -216,9 +216,9 @@ inline genetic_result_t random_selection_patryk(SimulationManager *sim)
         ad[ii] += ad[ii - 1];
     }
     
-    printf("selection/CDF: [");
-    for (unsigned int ii=0; ii<m; ii++)  printf("%.3lf ",ad[ii]);
-    printf("]\n");
+    //printf("selection/CDF: [");
+    //for (unsigned int ii=0; ii<m; ii++)  printf("%.3lf ",ad[ii]);
+    //printf("]\n");
     
     // 
     double rand = 0.0;

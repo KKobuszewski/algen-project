@@ -13,7 +13,7 @@ private:
     
 public:
     char name[256];
-    char access_mode[2];
+    char access_mode[8];
     FILE* stream;
     
     File(const char*, const char*);
